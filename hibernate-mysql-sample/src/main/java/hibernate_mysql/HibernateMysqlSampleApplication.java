@@ -15,6 +15,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Example;
 import static org.springframework.data.domain.ExampleMatcher.*;
 
+import java.util.List;
+
 @SpringBootApplication
 @EntityScan(basePackageClasses = Student.class)
 @EnableJpaRepositories(basePackageClasses = StudentRepository.class)
@@ -46,5 +48,9 @@ public class HibernateMysqlSampleApplication implements CommandLineRunner {
 				.withMatcher("name", s -> s.startsWith().ignoreCase()));
 		logger.info("Students name starting with m = {}", repository.findAll(example));
 		logger.info("Students = {}", repository.findAll());
+		logger.info("Students with criteria = {}", repository.findByColumns("%cr%", 2, 4));
+		List<Object[]> result = repository.groupByAddress();
+		logger.info("Address grouping");
+		result.forEach(r -> logger.info("Address= {} Count= {}", r[0], r[1]));
 	}
 }
