@@ -12,8 +12,6 @@ import models.StudentRepository;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.Example;
-import static org.springframework.data.domain.ExampleMatcher.*;
 
 import java.util.List;
 
@@ -43,14 +41,18 @@ public class HibernateMysqlSampleApplication implements CommandLineRunner {
 		repository.save(second);
 		logger.info("Student count = {}", repository.count());
 		logger.info("Students named Ahmet or age at 5 = {}", repository.findByNameOrAge("Ahmet", 5));
-		Student criteria = new Student("m", 0, null);
-		Example<Student> example = Example.of(criteria, matching().withIgnorePaths("id", "age", "address")
-				.withMatcher("name", s -> s.startsWith().ignoreCase()));
-		logger.info("Students name starting with m = {}", repository.findAll(example));
 		logger.info("Students = {}", repository.findAll());
-		logger.info("Students with criteria = {}", repository.findByColumns("%cr%", 2, 4));
+		logger.info("Students with criteria = {}", repository.findByColumns(null, "%cr%", 2, 4));
+		logger.info("Student names with criteria = {}", repository.findNameByColumns("%cr%", -1, -1));
 		List<Object[]> result = repository.groupByAddress();
 		logger.info("Address grouping");
 		result.forEach(r -> logger.info("Address= {} Count= {}", r[0], r[1]));
+		// Updating age of the records where address contains sm4
+		List<Student> studentsToUpdate = repository.findByColumns(null, "%sm4%", -1, -1);
+		studentsToUpdate.forEach(s -> s.setAge(s.getAge() + 10));
+		repository.saveAll(studentsToUpdate);
+		logger.info("Students = {}", repository.findAll());
+		repository.deleteAll(repository.findByColumns(null, "%cr0%", -1, -1));
+		logger.info("Students = {}", repository.findAll());
 	}
 }
